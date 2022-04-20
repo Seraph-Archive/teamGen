@@ -78,7 +78,7 @@ const rerun = async () => {
     ]).then((confirm) => {
     if (confirm.rerun) {
         return spawnEmployee();
-    } //try this, if not add function to generate html here instead
+    }
     return returnSquad();
 })
     
@@ -153,6 +153,3 @@ const writePage = data => {
 
 spawnManager()
     .then(spawnEmployee)
-    // .then(page => {
-    //     return writePage(page)
-    // })
