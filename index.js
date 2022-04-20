@@ -8,8 +8,8 @@ const makePage = require('./src/makePage')
 
 const squad = []
 
-spawnEngineer = () => {
-    return inquirer.prompt([
+const spawnEngineer = () => {
+     return inquirer.prompt([
         {
             type: 'input',
             name: 'name',
@@ -31,13 +31,62 @@ spawnEngineer = () => {
             message: 'What is the Github username of the Engineer?'
         },
     ])
-        .then((engineerInfo) => {
-            const { name, ID, email, github } = engineerInfo;
-            const newEngineer = new Engineer(name, ID, email, github);
-            console.log(newEngineer);
-            squad.push(newEngineer);
-        });
+    .then((engineerInfo) => {
+    const { name, ID, email, github } = engineerInfo;
+    const newEngineer = new Engineer(name, ID, email, github);
+    squad.push(newEngineer);
+    })
 };
+
+const spawnIntern = () => {
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'name',
+            message: 'What is the name of the Intern?'
+        },
+        {
+            type: 'input',
+            name: 'ID',
+            message: 'What is the ID of the Intern?'
+        },
+        {
+            type: 'input',
+            name: 'email',
+            message: 'What is the email of the Intern?'
+        },
+        {
+            type: 'input',
+            name: 'school',
+            message: 'What school does the Intern go to?'
+        },
+    ])
+    .then((internInfo) => {
+    const { name: name_1, ID: ID_1, email: email_1, school } = internInfo;
+    const newIntern = new Intern(name_1, ID_1, email_1, school);
+    squad.push(newIntern);
+    })
+};
+
+const rerun = async () => {
+      await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'rerun',
+            message: 'Add another employee?'
+        }
+    ]).then((confirm) => {
+    if (confirm.rerun) {
+        return spawnEmployee();
+    } //try this, if not add function to generate html here instead
+    return returnSquad();
+})
+    
+}
+
+const returnSquad = () => {
+    return makePage(squad)
+}
 
 
 const spawnManager = () => {
@@ -66,13 +115,13 @@ const spawnManager = () => {
     .then((managerInfo) => {
     const { name, ID, email, office } = managerInfo;
     const newManager = new Manager(name, ID, email, office);
-    console.log(newManager);
     squad.push(newManager);
 })
 };
 
+
 const spawnEmployee = async () => {
-    await inquirer.prompt([
+     await inquirer.prompt([
         {
             type: 'list',
             name: 'select',
@@ -82,81 +131,13 @@ const spawnEmployee = async () => {
     ])
     .then((responses) => {
     if (responses.select === 0) {
-        spawnEngineer()
-        // spawnEngineer = async () => {
-        //     return await inquirer.prompt([
-        //         {
-        //             type: 'input',
-        //             name: 'name',
-        //             message: 'What is the name of the Engineer?'
-        //         },
-        //         {
-        //             type: 'input',
-        //             name: 'ID',
-        //             message: 'What is the ID of the Engineer?'
-        //         },
-        //         {
-        //             type: 'input',
-        //             name: 'email',
-        //             message: 'What is the email of the Engineer?'
-        //         },
-        //         {
-        //             type: 'input',
-        //             name: 'github',
-        //             message: 'What is the Github username of the Engineer?'
-        //         },
-        //     ])
-        //         .then((engineerInfo) => {
-        //             const { name, ID, email, github } = engineerInfo;
-        //             const newEngineer = new Engineer(name, ID, email, github);
-        //             console.log(newEngineer);
-        //             squad.push(newEngineer);
-        //         });
-        // };
+        return spawnEngineer();
+
     } else if (responses.select === 1) {
-        spawnIntern = async () => {
-            const internInfo = await inquirer.prompt([
-                {
-                    type: 'input',
-                    name: 'name',
-                    message: 'What is the name of the Intern?'
-                },
-                {
-                    type: 'input',
-                    name: 'ID',
-                    message: 'What is the ID of the Intern?'
-                },
-                {
-                    type: 'input',
-                    name: 'email',
-                    message: 'What is the email of the Intern?'
-                },
-                {
-                    type: 'input',
-                    name: 'school',
-                    message: 'What school does the Intern go to?'
-                },
-            ]);
-            const { name: name_1, ID: ID_1, email: email_1, school } = internInfo;
-            const newIntern = new Intern(name_1, ID_1, email_1, school);
-            console.log(newIntern);
-            squad.push(newIntern);
-        };
+        return spawnIntern();
     }
-})
-    inquirer.prompt([
-        {
-            type: 'confirm',
-            name: 'rerun',
-            message: 'Add another employee?'
-        }
-    ])
-        .then((confirm) => {
-            if (confirm.rerun) {
-                spawnEmployee();
-            }
-        });
-    
+    })
+    .then(rerun)
     }
 
 const writePage = data => {
@@ -169,11 +150,9 @@ const writePage = data => {
         }
     })
 }
+
 spawnManager()
     .then(spawnEmployee)
-    .then(squad => {
-        return makePage(squad)
-    })
-    .then(page => {
-        return writePage(page)
-    })
+    // .then(page => {
+    //     return writePage(page)
+    // })
