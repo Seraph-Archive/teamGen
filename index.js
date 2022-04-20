@@ -3,15 +3,14 @@ const fs = require('fs');
 
 const Engineer = require('./lib/Engineer')
 const Manager = require('./lib/Manager');
-const { choices } = require('yargs');
 const Intern = require('./lib/Intern')
 const makePage = require('./src/makePage')
 
 const squad = []
 
 
-const spawnManager = async () => {
-    const managerInfo = await inquirer.prompt([
+const spawnManager = () => {
+    return inquirer.prompt([
         {
             type: 'input',
             name: 'name',
@@ -32,27 +31,28 @@ const spawnManager = async () => {
             name: 'office',
             message: 'What is the office number of the Manager?'
         },
-    ]);
+    ])
+    .then((managerInfo) => {
     const { name, ID, email, office } = managerInfo;
     const newManager = new Manager(name, ID, email, office);
     console.log(newManager);
     squad.push(newManager);
+})
 };
 
 const spawnEmployee = async () => {
-    const choice = await inquirer.prompt([
+    await inquirer.prompt([
         {
             type: 'list',
             name: 'select',
             message: 'What type of Employee would you like to add?',
-            choices: ['Engineer', 'Intern']
+            choices: [{ name: 'Engineer', value: 0 }, { name: 'Intern', value: 1 }]
         }
-        
-    ]);
-    console.log(choice)
-    if (choice.select === 'Engineer') {
+    ])
+    .then((responses) => {
+    if (responses.select === 0) {
         spawnEngineer = async () => {
-            const engineerInfo = await inquirer.prompt([
+            return await inquirer.prompt([
                 {
                     type: 'input',
                     name: 'name',
@@ -73,17 +73,17 @@ const spawnEmployee = async () => {
                     name: 'github',
                     message: 'What is the Github username of the Engineer?'
                 },
-            ]);
-            const { name, ID, email, github } = engineerInfo;
-            const newEngineer = new Engineer(name, ID, email, github);
-            console.log(newEngineer);
-            squad.push(newEngineer);
-
+            ])
+                .then((engineerInfo) => {
+                    const { name, ID, email, github } = engineerInfo;
+                    const newEngineer = new Engineer(name, ID, email, github);
+                    console.log(newEngineer);
+                    squad.push(newEngineer);
+                });
         };
-        spawnEngineer();
-    } else if (choice.select === 'Intern') {
-        spawnIntern = () => {
-            inquirer.prompt([
+    } else if (responses.select === 1) {
+        spawnIntern = async () => {
+            const internInfo = await inquirer.prompt([
                 {
                     type: 'input',
                     name: 'name',
@@ -111,6 +111,7 @@ const spawnEmployee = async () => {
             squad.push(newIntern);
         };
     }
+})
     inquirer.prompt([
         {
             type: 'confirm',
@@ -124,7 +125,7 @@ const spawnEmployee = async () => {
             }
         });
     
-}
+    }
 
 const writePage = data => {
     fs.writeFile('./dist/index.html', data, err => {
